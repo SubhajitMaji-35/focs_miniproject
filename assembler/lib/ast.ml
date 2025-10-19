@@ -36,6 +36,9 @@ type comp =
   |BitOrDA
   |BitOrDM
 
+
+
+
 (*
   Basic Instructions
  *)
@@ -80,7 +83,7 @@ end
 
 module Program = struct
   
-  
+  type 'v program = 'v Inst.t list
   
 end
 
