@@ -1,7 +1,7 @@
 
 open Ast
 
-module Jump = struct
+module Mnemnnics = struct
 let jumpof (j:Inst.jinst) : Inst.cinst =
   match j with
   | JMP -> {destination= [];
@@ -25,9 +25,6 @@ let jle = jumpof JLE
 
 let jmp = jumpof JMP
 
-end
-
-module OutOP = struct
   let add (r: Reg.t ) = Inst.Bapply(Add, r)
 
   let sub (r: Reg.t ) = Inst.Bapply(Sub, r)
@@ -43,11 +40,9 @@ module OutOP = struct
   let succ (r: Reg.t) = Inst.Uapply(Succ, r)
 
   let pred (r:Reg.t) = Inst.Uapply(Pred, r)
-    
-end
 
 let assign (r:Reg.t) (o: Inst.output) : 'v Inst.t = C {destination = [r];
                                                          output = o;
-                                                         jump = None}
-
-
+                                                       jump = None}
+    
+end
