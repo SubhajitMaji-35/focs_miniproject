@@ -39,13 +39,13 @@ module Computation = struct
 
   module Const = struct
     
-  let contstant (c: Inst.const) : int list =
+  let constant (c: Inst.const) : int list =
     match c with
     | Zero -> [0; 1; 0; 1; 0; 1; 0]
     | One -> [0; 1; 1; 1; 1; 1; 1]
     | MinusOne -> [0; 1; 1; 1; 0; 1; 0]
 
-end
+ end
 
   module Unary = struct
 
@@ -75,5 +75,31 @@ end
       | _ -> regenc r @ unary u
 
   end
-   
+
+  module Binary = struct
+
+    let regenc (r: Reg.t) : int list =
+      match r with
+       | A -> [0]
+       | _ -> [1]
+
+    let binary (b: Inst.binary) : int list =
+      match b with
+      | Add -> [0; 0; 0; 0; 1; 0]
+      | Sub -> [0; 1; 0; 0; 1; 1]
+      | SubFrom -> [0; 0; 0; 1; 1; 1]
+      | BAnd -> [0; 0; 0; 0; 0; 0]
+      | BOr -> [0; 1; 0; 1; 0; 1]
+
+    let encode (r: Reg.t) (b: Inst.binary) : int list =
+      (regenc r) @ (binary b) 
+    
+  end
+
+  let encode (out : Inst.output) : int list =
+    match out with
+    | Inst.Constant c -> Const.constant c
+    | Inst.Uapply (u, r) -> Unary.encode r u
+    | Inst.Bapply (b, r) -> Binary.encode r b
+
 end
