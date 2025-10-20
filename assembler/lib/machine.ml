@@ -19,3 +19,18 @@ module Jump = struct
     | None -> [0; 0; 0]
     
   end
+
+module Destination = struct
+
+  let encoding (r: Reg.t) : int list =
+    match r with
+    | Reg.A -> [1; 0; 0]
+    | Reg.D -> [0; 1; 0]
+    | Reg.M -> [0; 0; 1]
+
+  let rec encode (lst: Reg.t list) : int list =
+    match lst with
+    | [] -> [0; 0; 0]
+    | x :: xs -> List.map2 (lor) (encoding x) (encode xs)
+  
+end

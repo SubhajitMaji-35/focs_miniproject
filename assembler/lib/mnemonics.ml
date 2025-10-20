@@ -1,7 +1,7 @@
 
 open Ast
 
-module Mnemnnics = struct
+module Mnemonics = struct
 let jumpof (j:Inst.jinst) : Inst.cinst =
   match j with
   | JMP -> {destination= [];
