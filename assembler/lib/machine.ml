@@ -37,10 +37,43 @@ end
 
 module Computation = struct
 
+  module Const = struct
+    
   let contstant (c: Inst.const) : int list =
     match c with
     | Zero -> [0; 1; 0; 1; 0; 1; 0]
     | One -> [0; 1; 1; 1; 1; 1; 1]
     | MinusOne -> [0; 1; 1; 1; 0; 1; 0]
-  
+
+end
+
+  module Unary = struct
+
+    let regenc (r: Reg.t) : int list =
+      match r with
+      | D -> [0; 0; 0; 1; 1]
+      | A -> [0; 1; 1; 0; 0]
+      | M -> [1; 1; 1; 0; 0]
+
+    let unary (u: Inst.unary) : int list =
+      match u with
+      | ID -> [0; 0]
+      | BNeg -> [0; 1]
+      | UMinus -> [1; 1]
+      | Pred -> [1; 0]
+      | Succ -> [1; 1]
+
+    let succ (r : Reg.t ) : int list =
+      match r with
+      | D -> [0; 0; 1; 1; 1; 1; 1]
+      | A -> [0; 1; 1; 0; 1; 1; 1]
+      | M -> [1; 1; 1; 0; 1; 1; 1]
+
+    let encode (r: Reg.t) (u: Inst.unary) : int list =
+      match u with
+      | Succ -> succ r
+      | _ -> regenc r @ unary u
+
+  end
+   
 end
