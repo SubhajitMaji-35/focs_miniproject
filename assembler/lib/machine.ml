@@ -34,3 +34,13 @@ module Destination = struct
     | x :: xs -> List.map2 (lor) (encoding x) (encode xs)
   
 end
+
+module Computation = struct
+
+  let contstant (c: Inst.const) : int list =
+    match c with
+    | Zero -> [0; 1; 0; 1; 0; 1; 0]
+    | One -> [0; 1; 1; 1; 1; 1; 1]
+    | MinusOne -> [0; 1; 1; 1; 0; 1; 0]
+  
+end
