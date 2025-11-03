@@ -1,0 +1,31 @@
+(*Symbol Table*)
+
+module StringMap = Map.Make(String)
+
+type env = int StringMap.t
+
+let add =StringMap.add
+let find =StringMap.find_opt
+let contains =StringMap.mem                
+
+let add_registers (t : env) : env =
+  let rec add_n n (eta : env) : env =
+    if n<0 then eta
+    else
+      let rval = "R" ^ (string_of_int n) in
+      let eta' = add rval n eta in
+      add_n (n-1) eta'
+  in
+  add_n 15 t
+
+let initial : env =
+  StringMap.empty
+  |>add "SP" 0
+  |>add "LCL" 1
+  |>add "ARG" 2
+  |>add "THIS" 3
+  |>add "THAT" 4
+  |>add "SCREEN" 16348
+  |>add "KBD" 24576
+  |>add_registers
+

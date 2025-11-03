@@ -1,5 +1,7 @@
 
 open Ast
+open SymbolTable
+  
 
 module Jump = struct
 
@@ -111,3 +113,45 @@ module Cinst = struct
   
 end
 
+module Ainst = struct
+
+  let int_to_15bitbinary (n : int) : string =
+    if n<0 || n>=32768 then
+      failwith("Address out of range: "  ^ (string_of_int n));
+
+    let rec to_binary acc n k =
+      if k<1 then  (*Base Case*)
+        if acc ="" then "0" else acc
+      else
+        let bit = string_of_int (n/k) in
+        to_binary (acc ^ bit) (n mod k) (k/2)
+    in
+
+    let bin_string = to_binary "" n 16384 in
+
+    let pad_len = 15 - (String.length bin_string) in
+    if pad_len < 0 then
+      failwith( "Binary converion error for: " ^ (string_of_int n));
+
+    (String.make pad_len '0') ^ bin_string
+
+  let encode (symbol : string) (table : SymbolTable.t) (ram_addr : int ref) : string =
+
+    let final_address =
+      match int_of_string_opt symbol with
+      | Some value -> value
+      | None ->
+        match find table symbol with
+        | Some address -> address
+        | None ->
+          let new_var = !ram_addr in
+
+          SymbolTable.add table symbol new_var;
+          ram_addr := !ram_addr + 1;
+          new_var
+
+    in
+
+    "0" ^ (int_to_15bitbinary final_address)
+        
+end
