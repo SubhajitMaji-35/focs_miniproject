@@ -103,3 +103,11 @@ module Computation = struct
     | Inst.Bapply (b, r) -> Binary.encode r b
 
 end
+
+module Cinst = struct
+
+  let encode (c: Inst.cinst) : int list = match c with
+    | {destination = d; output = o; jump = j} -> [1; 1; 1;] @ (Computation.encode o) @ (Destination.encode d) @ (Jump.encode j)
+  
+end
+
