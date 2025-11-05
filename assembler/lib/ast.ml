@@ -36,12 +36,16 @@ module Inst = struct
                }
 
   type 'v t = A of 'v
-            | C of cinst
+            | C  of cinst
+	    | Ref of int
+	    | Label of 'v
   
   
   let map f = function
   | A x -> A (f x)
   | C i -> C i
+  | Ref r -> Ref r
+  | Label l -> Label l
 
 end
 
