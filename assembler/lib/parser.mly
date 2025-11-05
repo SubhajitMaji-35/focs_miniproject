@@ -48,21 +48,14 @@
 %%
 
 prog:
-  | program EOF { $1 }
-  ;
+    | EOF { [] }    
+    | program EOF { $1 }
+    ;
+    
 program:
-  | { [] } 
-  | inst_check program {
-      match $1 with
-      | Some inst -> inst :: $2
-      | None -> $2 
-    }
-  ;
-
-inst_check:
-  | instruction NEWLINE { Some $1 }
-  | NEWLINE           { None }
-  ;
+    | { [] } 
+    | instruction NEWLINE program { $1::$3 }
+    | NEWLINE program { $2 }
 
 instruction:
     |a_instruction { $1 }
