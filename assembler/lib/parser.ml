@@ -82,8 +82,8 @@ let parse_cinst (str : string) : Inst.cinst =
   let dest : Reg.t list =
     match p_dest with
     | "" -> [] | "A" -> [Reg.A] | "D" -> [Reg.D] | "M" -> [Reg.M]
-    | "AD" -> [Reg.A; Reg.D] | "AM" -> [Reg.A; Reg.M] | "DM" -> [Reg.D; Reg.M]
-    | "ADM" -> [Reg.A; Reg.D; Reg.M] | _ -> failwith "invalid dest"
+    | "AD" -> [Reg.A; Reg.D] | "AM" -> [Reg.A; Reg.M] | "DM" | "MD" -> [Reg.D; Reg.M]
+    | "ADM" | "AMD" -> [Reg.A; Reg.D; Reg.M] | _ -> failwith "invalid dest"
   in
 
   let comp : Inst.output =
