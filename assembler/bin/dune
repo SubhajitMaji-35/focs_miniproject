@@ -1,4 +1,4 @@
 (executable
  (public_name assembler)
  (name main)
- (libraries assembler))
+ (libraries lib))

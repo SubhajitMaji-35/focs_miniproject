@@ -1,14 +1,4 @@
 (library
- (name assembler)
- (modules ast parser lexer machine mnemonics symbolTable)
- (libraries menhirLib)
+ (name lib)
+ (modules ast parser machine mnemonics symbolTable)
  )
-
-(menhir (modules parser)
-;  (flags --exn-carries-state --trace --dump)
- (flags --exn-carries-state)
-
-  ; (flags --strict)
-)
-
-(ocamllex (modules lexer))
