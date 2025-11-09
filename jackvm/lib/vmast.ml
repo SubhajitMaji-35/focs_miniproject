@@ -14,21 +14,12 @@ end
 
 module Command = struct
 
-  type label = string
-                
-  type functionName = string
-
-  type nVars = int
-  type nArgs = int
-
-  type index = int
-
-  type t = Push of Segment.t * index
-         | Pop of Segment.t * index
-         |ACommands of arithmetic
-         | BCommands of branch * label
-         | C_Function of functionName * nVars
-         | C_call of functionName * nArgs
+  type t = Push of Segment.t * int
+         | Pop of Segment.t * int
+         | ACommands of arithmetic
+         | BCommands of branch * string
+         | C_Function of string * int
+         | C_Call of string * int
          | Return
   and arithmetic = Add | Sub | Neg
                  | Eq | Gt | Lt
@@ -36,5 +27,11 @@ module Command = struct
   and branch = Label | Goto | Ifgo
                
                 
+end
+
+module Program = struct
+
+  type 'v t = Command.t list
+
 end
 
