@@ -9,12 +9,14 @@ let contains = Hashtbl.mem
 
 let find = Hashtbl.find_opt
 
+(*Helper function to add the initial set of 16 registers*)
 let add_registers (table: t) : unit =
   for i = 0 to 15 do
     let label = "R" ^ (string_of_int i) in
     add table label i
   done
 
+(*Function to populate the Symbol Table with the initial key value pairs*)
 let populate_initial (table: t) : unit =
   add table "SP" 0;
   add table "LCL" 1;

@@ -1,8 +1,7 @@
-
 open Ast
 open SymbolTable
   
-
+(*Module jump encodes the jump part of the C Instruction and outputs a bit list [j; j; j]*)
 module Jump = struct
 
   let jump (j: Inst.jinst) : int list=
@@ -22,6 +21,7 @@ module Jump = struct
     
   end
 
+(*Module destination encodes the destination part of C Instruction and outputs a bit list [d; d; d]*)
 module Destination = struct
 
   let encoding (r: Reg.t) : int list =
@@ -37,11 +37,13 @@ module Destination = struct
   
 end
 
+(*Module computation encodes the computation part of C Instruction and outputs a bit list [a; c; c; c; c; c; c]*)
 module Computation = struct
 
+  (*Submodule for Constant computation*)
   module Const = struct
     
-  let constant (c: Inst.const) : int list =
+  let encode (c: Inst.const) : int list =
     match c with
     | Zero -> [0; 1; 0; 1; 0; 1; 0]
     | One -> [0; 1; 1; 1; 1; 1; 1]
@@ -49,6 +51,7 @@ module Computation = struct
 
  end
 
+  (*Submodule for Unary computation*)
   module Unary = struct
 
     let regenc (r: Reg.t) : int list =
@@ -78,6 +81,7 @@ module Computation = struct
 
   end
 
+  (*Submodule for Binary computation*)
   module Binary = struct
 
     let regenc (r: Reg.t) : int list =
@@ -98,14 +102,16 @@ module Computation = struct
     
   end
 
+  (*Final computation encoding function*)
   let encode (out : Inst.output) : int list =
     match out with
-    | Inst.Constant c -> Const.constant c
+    | Inst.Constant c -> Const.encode c
     | Inst.Uapply (u, r) -> Unary.encode r u
     | Inst.Bapply (b, r) -> Binary.encode r b
 
 end
 
+(*Module Cinst for encoding the whole C Instruction*)
 module Cinst = struct
 
   let encode (c: Inst.cinst) : int list = match c with
@@ -113,8 +119,10 @@ module Cinst = struct
   
 end
 
+(*Module Ainst for encoding the A Instruction*)
 module Ainst = struct
 
+  (*This function converts a decimal value within range( 0 - (2^15 -1)) to a 15 bit binary string*)
   let int_to_15bitbinary (n : int) : string =
     if n<0 || n>=32768 then
       failwith("Address out of range: "  ^ (string_of_int n));
@@ -129,14 +137,21 @@ module Ainst = struct
 
     let bin_string = to_binary "" n 16384 in
 
-    let pad_len = 15 - (String.length bin_string) in
-    if pad_len < 0 then
-      failwith( "Binary converion error for: " ^ (string_of_int n));
+    (*For checking the output of to_binary*)
+    if String.length bin_string = 15 then bin_string
+    else
+      failwith "binary conversion error"
 
-    (String.make pad_len '0') ^ bin_string
-
+  (*This is the final encoding for A Instruction and here the ram address is a reference type
+  mutable box pointing to an integer*)
   let encode (symbol : string) (table : SymbolTable.t) (ram_addr : int ref) : string =
 
+    (*
+       In this function,
+       If the symbol is a number then it returns the binary of the number
+       else it looks for the value corresponding to symbol key in the symbol table and returns the value
+       else if it is not found then it adds the symbol key with the next ram address value
+     *)
     let final_address =
       match int_of_string_opt symbol with
       | Some value -> value

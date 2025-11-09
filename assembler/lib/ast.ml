@@ -1,10 +1,11 @@
-(** * The abstraxxct syntax tree.
+(** * The abstract syntax tree.
 
+    It captures all the types for the whole Program
  *)
 
 
 (*
-  Basic Instructions
+  Registers - A, D, M
  *)
 
 module Reg = struct
@@ -12,6 +13,14 @@ module Reg = struct
          |D
          |M
 end
+
+
+(*
+   Basic Instructions
+   - A Instruction
+   _ C Instruction
+   _ L Instruction (Labels)
+*)
 
 module Inst = struct
 
@@ -36,22 +45,27 @@ module Inst = struct
                }
 
   type 'v t = A of 'v
+            | AN of int
             | C  of cinst
-	    | Ref of int
 	    | Label of 'v
   
   
   let map f = function
-  | A x -> A (f x)
-  | C i -> C i
-  | Ref r -> Ref r
-  | Label l -> Label l
+    | A x -> A (f x)
+    | AN r -> AN (f r)
+    | C i -> C i
+    | Label l -> Label l
 
 end
+
+(*
+   Program type which will contain all the instructions in the whole program sequentially
+*)
 
 module Program = struct
   
   type 'v program = 'v Inst.t list
   
 end
+
 
