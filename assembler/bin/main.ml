@@ -92,7 +92,8 @@ let () =
       Printf.printf "Done assembling.\n"
     else
       Printf.eprintf "Error in writing"
-      
+
+   (*For the case when count of input files is not one*)
   | _ -> Printf.eprintf "error filename";
     exit 1
 
