@@ -82,3 +82,34 @@ let arithmetic = function
   | "not" -> ["@SP"; "A=M-1"; "M=!M"]
   | _ as s -> failwith ("error artithmetic: " ^ s)
 
+let l_count = ref 0
+
+let label_gen str =
+  let n = !l_count in
+  l_count := !l_count + 1;
+  Printf.sprintf "%s_%d" str n
+
+let comp_op jump =
+  let l_true = label_gen "TRUE" in
+  let l_end = label_gen "END" in
+
+  [
+    "@SP";
+    "AM=M-1";
+    "D=M";
+    "A=A-1";
+    "D=M-D";
+    Printf.sprintf "@%s" l_true;
+    Printf.sprintf "D;%s" jump;
+    "@SP";
+    "A=M-1";
+    "M=0";
+    Printf.sprintf "@%s" l_end;
+    "0;JMP";
+    Printf.sprintf "(%s)" l_true;
+    "@SP";
+    "A=M-1";
+    "M=-1";
+    Printf.sprintf "(%s)" l_end
+  ]
+
