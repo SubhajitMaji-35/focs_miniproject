@@ -6,6 +6,8 @@ let join_lists lst = List.fold_left (@) [] lst
   
 let join_lines lines = String.concat "\n" lines
 
+let curr_func = ref ""
+
 module Arithmetic = struct
 
   let encode = function
@@ -44,11 +46,25 @@ module Pop = struct
   
 end
 
+module Branch = struct
+
+  let encode = function
+    | (Command.Label, lname) -> b_label lname !curr_func
+    | (Command.Goto, lname) -> b_goto lname !curr_func
+    | (Command.Ifgo, lname) -> b_ifgo lname !curr_func
+  
+end
+
 let encoding = function
+  | Command.C_Function (fname, n) ->
+    curr_func := fname;
+    function_def fname n
+  | Command.C_Call (fname, n) -> function_call fname n
+  | Command.Return -> function_return
   | Command.ACommands a -> Arithmetic.encode a
   | Command.Push (seg, n) -> Push.encode (seg, n)
   | Command.Pop (seg, n) -> Pop.encode (seg, n)
-  | _ -> []
+  | Command.BCommands (branch, lname) -> Branch.encode (branch, lname)
 
 let encode (program: 'v Program.t) =
   List.map encoding program |> join_lists

@@ -69,10 +69,6 @@ let store_pointer i =
   let base = if i =0 then "THIS" else "THAT" in
   pop_d @ [Printf.sprintf "@%s" base; "M=D"]
 
-let label name = [Printf.sprintf "(%s)" name]
-let goto name = [Printf.sprintf "@%s" name; "0;JMP"]
-let ifgo name = pop_d @ [Printf.sprintf "@%s" name; "D;JNE"]
-
 let arithmetic = function
   | "add" -> ["@SP"; "AM=M-1"; "D=M"; "A=A-1"; "M=D+M"]
   | "sub" -> ["@SP"; "AM=M-1"; "D=M"; "A=A-1"; "M=M-D"]
@@ -112,4 +108,87 @@ let comp_op jump =
     "M=-1";
     Printf.sprintf "(%s)" l_end
   ]
+
+
+let funclabel_gen fname lname =
+  if fname ="" then lname else fname ^ "$" ^ lname
+
+let b_label lname fname =
+  let fullname = funclabel_gen fname lname in
+  [
+    Printf.sprintf "(%s)" fullname
+  ]
+
+let b_goto lname fname =
+  let fullname = funclabel_gen fname lname in
+  [
+    Printf.sprintf "@%s" fullname;
+    "0;JMP"
+  ]
+
+let b_ifgo lname fname =
+  let fullname = funclabel_gen fname lname in
+
+  pop_d
+  @ [
+    Printf.sprintf "@%s" fullname;
+    "D;JNE"
+  ]
+
+
+(*Function Defination*)
+let rec init_locals n =
+  if n<=0 then []
+  else [
+    "@0";
+    "D=A";
+    "@SP";
+    "A=M";
+    "M=D";
+    "@SP";
+    "M=M+1"
+  ] @ init_locals (n-1)
+
+let function_def fname nVars =
+  [Printf.sprintf "(%s)" fname]
+  @ init_locals nVars
+
+(*Function Call*)
+let function_call fname nArgs =
+  let l_return = label_gen (fname ^ "$ret") in
+  [
+    Printf.sprintf "@%s" l_return; "D=A"; "@SP"; "A=M"; "M=D"; "@SP"; "M=M+1";
+    "@LCL"; "D=M"; "@SP"; "A=M"; "M=D"; "@SP"; "M=M+1";
+    "@ARG"; "D=M"; "@SP"; "A=M"; "M=D"; "@SP"; "M=M+1";
+    "@THIS"; "D=M"; "@SP"; "A=M"; "M=D"; "@SP"; "M=M+1";
+    "@THIS"; "D=M"; "@SP"; "A=M"; "M=D"; "@SP"; "M=M+1";
+
+    "@SP"; "D=M"; Printf.sprintf "@%d" (nArgs + 5);
+    "D=D-A"; "@ARG"; "M=D";
+    "@SP"; "D=M"; "@LCL"; "M=D";
+
+    Printf.sprintf "@%s" fname; "0;JMP";
+    Printf.sprintf "(%s)" l_return;
+  ]
+
+(*Function Return*)
+let function_return =
+  [
+    "@LCL"; "D=M"; "R13"; "M=D";                    (* FRAME = LCL*)
+    "@5"; "A=D-A"; "D=M"; "@R14"; "M=D";            (* RET = *(FRAME - 5)*)
+    "@SP"; "AM=M-1"; "D=M"; "@ARG"; "A=M"; "M=D";   (*  *ARG = pop()*)
+    "@ARG"; "D=M+1"; "@SP"; "M=D";                  (* SP = ARG + 1*)
+    "@R13"; "AM=M-1"; "D=M"; "@THAT"; "M=D";        (* THAT = *(FRAME-1)*)
+    "@R13"; "AM=M-1"; "D=M"; "@THIS"; "M=D";        (* THIS = *(FRAME-2)*)
+    "@R13"; "AM=M-1"; "D=M"; "@ARG"; "M=D";         (* ARG = *(FRAME-3)*)
+    "@R13"; "AM=M-1"; "D=M"; "@LCL"; "M=D";         (* LCL = *(FRAME-4)*)
+    "@R14"; "A=M"; "0;JMP";                         (* goto RET*)
+  ]
+
+(*Bootstrap Code*)
+let bootstrap () =
+  [
+    "@256"; "D=A"; "@SP"; "M=D"
+  ]
+  @ function_call "Sys.init" 0
 
