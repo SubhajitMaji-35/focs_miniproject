@@ -1,2 +1,4 @@
 (library
- (name jackvm))
+ (name jackvm)
+ (libraries assembler.lib)
+ (modules vmast vmparser encode utils))

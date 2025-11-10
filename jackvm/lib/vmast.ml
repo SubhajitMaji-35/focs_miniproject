@@ -25,8 +25,7 @@ module Command = struct
                  | Eq | Gt | Lt
                  | And | Or | Not
   and branch = Label | Goto | Ifgo
-               
-                
+                        
 end
 
 module Program = struct
