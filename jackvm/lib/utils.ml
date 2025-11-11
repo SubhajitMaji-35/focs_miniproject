@@ -161,7 +161,7 @@ let function_call fname nArgs =
     "@LCL"; "D=M"; "@SP"; "A=M"; "M=D"; "@SP"; "M=M+1";
     "@ARG"; "D=M"; "@SP"; "A=M"; "M=D"; "@SP"; "M=M+1";
     "@THIS"; "D=M"; "@SP"; "A=M"; "M=D"; "@SP"; "M=M+1";
-    "@THIS"; "D=M"; "@SP"; "A=M"; "M=D"; "@SP"; "M=M+1";
+    "@THAT"; "D=M"; "@SP"; "A=M"; "M=D"; "@SP"; "M=M+1";
 
     "@SP"; "D=M"; Printf.sprintf "@%d" (nArgs + 5);
     "D=D-A"; "@ARG"; "M=D";
@@ -174,7 +174,7 @@ let function_call fname nArgs =
 (*Function Return*)
 let function_return =
   [
-    "@LCL"; "D=M"; "R13"; "M=D";                    (* FRAME = LCL*)
+    "@LCL"; "D=M"; "@R13"; "M=D";                    (* FRAME = LCL*)
     "@5"; "A=D-A"; "D=M"; "@R14"; "M=D";            (* RET = *(FRAME - 5)*)
     "@SP"; "AM=M-1"; "D=M"; "@ARG"; "A=M"; "M=D";   (*  *ARG = pop()*)
     "@ARG"; "D=M+1"; "@SP"; "M=D";                  (* SP = ARG + 1*)

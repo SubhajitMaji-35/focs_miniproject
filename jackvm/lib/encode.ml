@@ -31,7 +31,9 @@ module Push = struct
     | (Segment.Argument, i) -> load_seg_value "ARG" i @ push_d
     | (Segment.Temp, i) -> load_temp i @ push_d
     | (Segment.Pointer, i) -> load_pointer i @ push_d
-    | _ -> failwith "push not completed" 
+    | (Segment.This, i) -> load_seg_value "THIS" i @ push_d
+    | (Segment.That, i) -> load_seg_value "THAT" i @ push_d
+    | _ -> failwith "push static not implemented" 
   
 end
 
@@ -42,7 +44,9 @@ module Pop = struct
     | (Segment.Argument, i) -> store_to_seg "ARG" i
     | (Segment.Temp, i) -> store_to_temp i
     | (Segment.Pointer, i) -> store_pointer i
-    | _ -> failwith "pop not completed"
+    | (Segment.This, i) -> store_to_seg "THIS" i
+    | (Segment.That, i) -> store_to_seg "THAT" i
+    | _ -> failwith "pop static not implemented"
   
 end
 
