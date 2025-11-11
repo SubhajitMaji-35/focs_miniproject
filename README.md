@@ -53,6 +53,7 @@ To execute this, follow the steps
 - It only shows basic errors (not implemented fully)
 - The output file is hardcoded as  ./assembler/test/out.hack
 - The encoded string of bits is hardcoded.
+- Using ref pointers to int in the counting of ram_address to avoid complexity.
 - Other limitations which I may be unaware of.
 
   ---
