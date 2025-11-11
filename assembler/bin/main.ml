@@ -55,18 +55,18 @@ let () =
        The labels will be added in the symbol table with their corresponding rom address
 
        *)
-    let handle_labelinst table rom_address inst =
-      match inst with
-      | Inst.Label label_name ->
-        SymbolTable.add table label_name !rom_address
-      | _ -> rom_address := !rom_address + 1
+    let first_pass instructions table =
+      let rec passing table instructions rom_address =
+        match instructions with
+        |[] -> ()
+        | (Inst.Label l_name) :: t-> SymbolTable.add table l_name rom_address;
+                                     passing table t rom_address
+        | _ :: t ->  passing table t (rom_address + 1)
+      in
+
+      passing table instructions 0
     in
-
-    let first_pass table all_instructions =
-      let rom_address = ref 0 in
-      List.iter (fun inst -> handle_labelinst table rom_address inst) all_instructions in
-    first_pass table all_instructions;
-
+    first_pass all_instructions table;
 
     (*
 
@@ -81,7 +81,7 @@ let () =
       | Inst.A symbol ->
         Some (Machine.Ainst.encode symbol table ram_address)
       | Inst.AN value ->
-        Some (Machine.Ainst.encode (string_of_int value) table ram_address)
+        Some (Machine.Ainst.encodeN value)
       | Inst.C c_record ->
         Some (Machine.Cinst.encode c_record |> string_of_intList)
       | Inst.Label _ ->

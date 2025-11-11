@@ -123,13 +123,13 @@ end
 module Ainst = struct
 
   (*This function converts a decimal value within range( 0 - (2^15 -1)) to a 15 bit binary string*)
-  let int_to_15bitbinary (n : int) : string =
+  let bit_encoding (n : int) : string =
     if n<0 || n>=32768 then
       failwith("Address out of range: "  ^ (string_of_int n));
 
     let rec to_binary acc n k =
       if k<1 then  (*Base Case*)
-        if acc ="" then "0" else acc
+        acc
       else
         let bit = string_of_int (n/k) in
         to_binary (acc ^ bit) (n mod k) (k/2)
@@ -153,10 +153,7 @@ module Ainst = struct
        else if it is not found then it adds the symbol key with the next ram address value
      *)
     let final_address =
-      match int_of_string_opt symbol with
-      | Some value -> value
-      | None ->
-        match find table symbol with
+      match find table symbol with
         | Some address -> address
         | None ->
           let new_var = !ram_addr in
@@ -167,6 +164,9 @@ module Ainst = struct
 
     in
 
-    "0" ^ (int_to_15bitbinary final_address)
+    "0" ^ (bit_encoding final_address)
+
+  let encodeN (value: int) : string =
+    "0" ^ (bit_encoding value)
         
 end
