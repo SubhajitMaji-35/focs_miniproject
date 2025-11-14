@@ -142,30 +142,23 @@ module Ainst = struct
     else
       failwith "binary conversion error"
 
-  (*This is the final encoding for A Instruction and here the ram address is a reference type
-  mutable box pointing to an integer*)
-  let encode (symbol : string) (table : SymbolTable.t) (ram_addr : int ref) : string =
-
+  (*This is the final encoding for A Instruction of symbol*)
+  let encode (symbol : string) (table : SymbolTable.t) : string =
     (*
        In this function,
-       If the symbol is a number then it returns the binary of the number
-       else it looks for the value corresponding to symbol key in the symbol table and returns the value
-       else if it is not found then it adds the symbol key with the next ram address value
+       It looks for the value corresponding to symbol key in the symbol table and returns the value
+       else if it is not found then it returns error
      *)
     let final_address =
       match find table symbol with
         | Some address -> address
-        | None ->
-          let new_var = !ram_addr in
-
-          SymbolTable.add table symbol new_var;
-          ram_addr := !ram_addr + 1;
-          new_var
+        | None -> failwith "symboltable symbol key error"
 
     in
 
     "0" ^ (bit_encoding final_address)
 
+  (*This is the final encoding for A instruction of integer*)
   let encodeN (value: int) : string =
     "0" ^ (bit_encoding value)
         

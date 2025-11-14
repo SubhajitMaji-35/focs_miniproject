@@ -55,40 +55,48 @@ let () =
        The labels will be added in the symbol table with their corresponding rom address
 
        *)
-    let first_pass instructions table =
-      let rec passing table instructions rom_address =
+    let first_pass instructions =
+      let rec passing instructions rom_address =
         match instructions with
         |[] -> ()
         | (Inst.Label l_name) :: t-> SymbolTable.add table l_name rom_address;
-                                     passing table t rom_address
-        | _ :: t ->  passing table t (rom_address + 1)
+                                     passing t rom_address
+        | _ :: t ->  passing t (rom_address + 1)
       in
 
-      passing table instructions 0
+      passing instructions 0
     in
-    first_pass all_instructions table;
+    first_pass all_instructions;
 
     (*
 
        Second Pass:
        This is the main pass which will make the final binary code list
+       It will check for the instructions and if it is l instruction, it will skip that
+       For A instruction of symbol , it will check if it is contained in the symbol table,
+       If not, then it will add it corresponding to the current ram address in the symbol Table
 
     *)
-    let ram_address = ref 16 in
-    
-    let binary_code = List.filter_map (fun inst ->
-      match inst with
-      | Inst.A symbol ->
-        Some (Machine.Ainst.encode symbol table ram_address)
-      | Inst.AN value ->
-        Some (Machine.Ainst.encodeN value)
-      | Inst.C c_record ->
-        Some (Machine.Cinst.encode c_record |> string_of_intList)
-      | Inst.Label _ ->
-        None
-      ) all_instructions in
 
-    if write_lines out_file binary_code then
+    let rec binary_code inst ram_address =
+      match inst with
+      | [] -> []
+      | h :: t->
+        match h with
+        | Inst.A symbol -> 
+            if (SymbolTable.contains table symbol) then
+              (Machine.Ainst.encode symbol table) :: binary_code t ram_address
+            else
+              begin
+              SymbolTable.add table symbol ram_address;
+              (Machine.Ainst.encode symbol table) :: binary_code t (ram_address + 1)
+            end
+        | Inst.AN value -> (Machine.Ainst.encodeN value) :: binary_code t ram_address
+        | Inst.C c_record -> (Machine.Cinst.encode c_record |> string_of_intList) :: binary_code t ram_address
+        | Inst.Label _ -> binary_code t ram_address
+    in
+    
+    if write_lines out_file (binary_code all_instructions 16) then
       Printf.printf "Done assembling.\n"
     else
       Printf.eprintf "Error in writing"

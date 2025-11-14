@@ -121,8 +121,7 @@ let parse_cinst (str : string) : Inst.cinst =
     | "A-D" -> Bapply(SubFrom, A) | "M-D" -> Bapply (SubFrom, M)
     | "D&A" -> Bapply (BAnd, A) | "D&M" -> Bapply (BAnd, M)
     | "D|A" -> Bapply (BOr, A) | "D|M" -> Bapply (BOr, M)
-    | _ as l-> let str = "error comp: " ^ l in
-               failwith str
+    | _ as l-> failwith ("error comp: " ^ l) 
   in
 
   (*Matching the jump string with the types defined in ast*)
