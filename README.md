@@ -32,7 +32,7 @@
 - A symbol table is generated with initialization.
 - The list of AST is then is then iterated in the Main for first pass, the labels are added in the symbol table and removed.
 - In the second pass, all the A instructions and C instructions are encoded using the Machine module.
-- At last, all the output strings will be written in a file *out.hack* line by line.
+- At last, all the output strings will be written in a file **out.hack** line by line.
 
 ---
 
@@ -44,7 +44,8 @@ To execute this, follow the steps
 - go to the dir ./assembler/
 - run  $dune build
 - run  $dune exec assembler --  {path to file}
-- The output will be generated in  ./assembler/test/out.asm.
+> THIS HAS TO BE RUN FROM THE DIR  **./assembler/**  only
+- The output will be generated in  ./assembler/test/out.hack.
 
 ---
 
@@ -53,7 +54,6 @@ To execute this, follow the steps
 - It only shows basic errors (not implemented fully)
 - The output file is hardcoded as  ./assembler/test/out.hack
 - The encoded string of bits is hardcoded.
-- Using ref pointers to int in the counting of ram_address to avoid complexity.
 - Other limitations which I may be unaware of.
 
   ---
