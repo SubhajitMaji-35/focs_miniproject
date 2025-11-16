@@ -63,6 +63,15 @@ module Branch = struct
   
 end
 
+(*
+   Main encode function
+   It takes a program of AST list
+   For every AST , it encodes to corresponding list of asm instructions
+   While defining a function, all the labels are function scoped and hence named as <label>$<fname>
+   In calling a function, a counter is also used , to generate unique lables of function return address
+
+   Then all the lists are joined inside the parent list and then it is returned
+*)
 let encode (program: 'v Program.t) =
   let rec encoding program func c =
     match program with
