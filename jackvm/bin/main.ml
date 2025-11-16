@@ -1,9 +1,11 @@
 open Jackvm
 open Vmast
 
+(*Helper function to check if the given file has extension ".vm"*)
 let check_vm_file (filename: string) : bool =
   Filename.check_suffix filename ".vm"
 
+(*This function parses the whole program string and converts it into a list of ASTs*)
 let parse_file (filepath: string) : 'v Program.t =
   let in_chan = In_channel.open_text filepath in
   let program = In_channel.input_all in_chan in
@@ -11,10 +13,12 @@ let parse_file (filepath: string) : 'v Program.t =
   In_channel.close in_chan;
   commands
 
+(*This function translates the entire ASTs to corresponding asm instructions*)
 let get_asm (commands: 'v Program.t) : string list =
-  Utils.bootstrap ()
+  Utils.bootstrap
   @ Encode.encode commands
 
+(*This function writes the given asm instructions line by line into the output file*)
 let write_lines (filepath : string) (lines: string list) : bool =
   let out_chan = Out_channel.open_text filepath in
   let rec write = function
@@ -46,6 +50,7 @@ let () =
     else
       Printf.eprintf "Error in writing%!";
 
+    (*After translating the vm codes to asm codes, the asm codes are now translated to hack binary using the assembler project*)
     let _ = Sys.command (Printf.sprintf "dune exec assembler -- %s" out_file ) in
     ()
 
