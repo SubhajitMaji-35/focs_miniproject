@@ -1,9 +1,14 @@
 
+(*
+   This file caontains the list of assembly codes corresponding to an operation
+   Basically , it is a helper file for the encode module
+*)
 
-
+(*SP Operation*)
 let sp_inc = ["@SP"; "M=M+1"]
 let sp_dec = ["@SP"; "M=M-1"]
 
+(*PUSH POP in D reg*)
 let push_d = [
   "@SP";
   "A=M";
@@ -16,11 +21,13 @@ let pop_d = [
   "D=M"
 ]
 
+(*Loading a consatant in D reg*)
 let load_constant n = [
   Printf.sprintf "@%d" n;
   "D=A"
 ]
 
+(*POP the stack head to address*)
 let pop_address address = [
   "@SP";
   "AM=M-1";
@@ -29,6 +36,7 @@ let pop_address address = [
   "M=D"
 ]
 
+(*Segment operations*)
 let load_seg_value seg i = [
   Printf.sprintf "@%s" seg;
   "D=M";
@@ -48,6 +56,12 @@ let store_to_seg seg i = [
   @ pop_d
   @ ["@R13"; "A=M"; "M=D"]
 
+(*
+   Temp opeartions
+   written explicitly because
+   Temp registers are R(5+i)
+   0<= i <= 7
+*)  
 let load_temp i = [
   Printf.sprintf "@R%d" (5+i);
   "D=M"
@@ -61,6 +75,7 @@ let store_to_temp i =[
 ] @ pop_d
   @ ["@R13"; "A=M"; "M=D"]
 
+(*THIS/THAT opearions*)
 let load_pointer i =
   let base = if i = 0 then "THIS" else "THAT" in
   [Printf.sprintf "@%s" base; "D=M"]
@@ -69,6 +84,7 @@ let store_pointer i =
   let base = if i =0 then "THIS" else "THAT" in
   pop_d @ [Printf.sprintf "@%s" base; "M=D"]
 
+(*Arithmetic operations*)
 let arithmetic = function
   | "add" -> ["@SP"; "AM=M-1"; "D=M"; "A=A-1"; "M=D+M"]
   | "sub" -> ["@SP"; "AM=M-1"; "D=M"; "A=A-1"; "M=M-D"]
@@ -78,16 +94,14 @@ let arithmetic = function
   | "not" -> ["@SP"; "A=M-1"; "M=!M"]
   | _ as s -> failwith ("error artithmetic: " ^ s)
 
-let l_count = ref 0
+(*Labelname generation for labels - <function_name>$<label_name> *)
+let funclabel_gen fname lname =
+  if fname ="" then lname else fname ^ "$" ^ lname
 
-let label_gen str =
-  let n = !l_count in
-  l_count := !l_count + 1;
-  Printf.sprintf "%s_%d" str n
-
-let comp_op jump =
-  let l_true = label_gen "TRUE" in
-  let l_end = label_gen "END" in
+(*Comparision Operations*)
+let comp_op jump fname =
+  let l_true = funclabel_gen fname "TRUE" in
+  let l_end = funclabel_gen fname "END" in
 
   [
     "@SP";
@@ -109,10 +123,7 @@ let comp_op jump =
     Printf.sprintf "(%s)" l_end
   ]
 
-
-let funclabel_gen fname lname =
-  if fname ="" then lname else fname ^ "$" ^ lname
-
+(*Label Branching*)
 let b_label lname fname =
   let fullname = funclabel_gen fname lname in
   [
@@ -135,6 +146,11 @@ let b_ifgo lname fname =
     "D;JNE"
   ]
 
+(*Helper function to generate uniuqe labels with a counter*)
+let unique_label fname lname count =
+  if fname = "" then lname ^ (string_of_int count)
+  else
+    fname ^ "$" ^ lname ^ (string_of_int count)
 
 (*Function Defination*)
 let rec init_locals n =
@@ -144,18 +160,17 @@ let rec init_locals n =
     "D=A";
     "@SP";
     "A=M";
-    "M=D";
-    "@SP";
-    "M=M+1"
-  ] @ init_locals (n-1)
+    "M=D"
+  ] @ sp_inc
+    @ init_locals (n-1)
 
 let function_def fname nVars =
   [Printf.sprintf "(%s)" fname]
   @ init_locals nVars
 
 (*Function Call*)
-let function_call fname nArgs =
-  let l_return = label_gen (fname ^ "$ret") in
+let function_call fname nArgs count=
+  let l_return = unique_label fname "ret" count in
   [
     Printf.sprintf "@%s" l_return; "D=A"; "@SP"; "A=M"; "M=D"; "@SP"; "M=M+1";
     "@LCL"; "D=M"; "@SP"; "A=M"; "M=D"; "@SP"; "M=M+1";
@@ -186,9 +201,9 @@ let function_return =
   ]
 
 (*Bootstrap Code*)
-let bootstrap () =
+let bootstrap =
   [
     "@256"; "D=A"; "@SP"; "M=D"
   ]
-  @ function_call "Sys.init" 0
+  @ b_goto "Sys.init" ""
 

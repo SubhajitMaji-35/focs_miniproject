@@ -1,7 +1,9 @@
 open Vmast
 
+(*Helper function to remove whitespaces*)
 let rm_whitespaces (str: string) : string = String.trim str
 
+(*Helper function to remove comments*)
 let rec rm_comments (str: string) : string =
   match String.index_opt str '/' with
   | Some i ->
@@ -16,8 +18,10 @@ let rec rm_comments (str: string) : string =
       str
   | None -> str 
 
+(*This function cleans the given string - removes all the comments and then whitspaces*)
 let clean_line (str: string) : string = rm_comments str |> rm_whitespaces
 
+(*This function removes all the blank lines*)
 let rec rm_empStr (lst: string list) : string list =
   match lst with
   | [] -> []
@@ -25,11 +29,27 @@ let rec rm_empStr (lst: string list) : string list =
     if h = "" then rm_empStr t
     else h :: rm_empStr t
 
+(*
+   This function takes a program string
+   gets the list of all the lines
+   cleans all the individual lines
+   removes all the blank lines
+   returns the list of clean lines of the program
+*)           
 let get_cleanLines (program: string) : string list =
   let lines = String.split_on_char '\n' program in
   let clean_lines = List.map clean_line lines in
   rm_empStr clean_lines
 
+(*Helper function to remove all the empty tokens - ""  *)
+let rec get_cleanTokens (tokens: string list) : string list =
+  match tokens with
+  | [] -> []
+  | h :: t -> if h = "" then get_cleanTokens t
+    else
+      h :: get_cleanTokens t
+
+(*This is a helper function to return the AST of a segment type*)
 let parse_segment (seg : string) : Segment.t =
   match seg with
   | "argument" -> Segment.Argument
@@ -42,10 +62,17 @@ let parse_segment (seg : string) : Segment.t =
   | "temp" -> Segment.Temp
   | _ as s -> failwith ("Error segment: " ^ s)
 
+(*
+   This function takes a line tokenizes it into individual tokens by splitting the line based on ' '
+   then gets clean tokens by removing all the empty tokens
+   then matches the list of tokens to generate the corresponding AST
+   Returns the AST
+*)
 let parse_command (line: string) : Command.t =
   let tokens = String.split_on_char ' ' line in
+  let clean_tokens = get_cleanTokens tokens in
 
-  match tokens with
+  match clean_tokens with
   | ["push"; seg; index] -> Command.Push (parse_segment seg, int_of_string index)
   | ["pop"; seg; index] -> Command.Pop (parse_segment seg, int_of_string index)
                              
@@ -69,6 +96,12 @@ let parse_command (line: string) : Command.t =
 
   | _ -> failwith ("parse error: " ^ line)
 
+(*
+   Main function to parse the whole program
+   Takes the program string
+   gets all the clean lines out of it
+   then maps the parseing function on the list of lines to get a list of corresponding ASTs
+*)
 let parse_program (program: string) : 'v  Program.t =
   program |> get_cleanLines |> List.map parse_command
 

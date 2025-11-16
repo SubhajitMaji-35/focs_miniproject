@@ -1,4 +1,7 @@
 
+(*
+   This is the file containing all the types and AST
+*)
 module Segment = struct
 
   type t = Argument

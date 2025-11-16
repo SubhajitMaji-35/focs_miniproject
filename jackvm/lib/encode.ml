@@ -1,28 +1,30 @@
-
+(*This file does the main encoding from ASTs to asm codes*)
+(*Uses the Utils module for the corrsponding asm codes of commands*)
 open Utils
 open Vmast
 
+(*Helper function to concatenate all the lists inside the parent list*)
 let join_lists lst = List.fold_left (@) [] lst
   
-let join_lines lines = String.concat "\n" lines
-
 let curr_func = ref ""
 
+(*Module Arithmetic*)
 module Arithmetic = struct
 
-  let encode = function
+  let encode curr_func = function
     | Command.Add -> arithmetic "add"
     | Command.Sub -> arithmetic "sub"
     | Command.Neg -> arithmetic "neg"
     | Command.And -> arithmetic "and"
     | Command.Or -> arithmetic "or"
     | Command.Not -> arithmetic "not"
-    | Command.Eq -> comp_op "JEQ"
-    | Command.Lt -> comp_op "JLT"
-    | Command.Gt -> comp_op "JGT"
+    | Command.Eq -> comp_op "JEQ" curr_func
+    | Command.Lt -> comp_op "JLT" curr_func
+    | Command.Gt -> comp_op "JGT" curr_func
   
 end
 
+(*Module Push*)
 module Push = struct
 
   let encode = function
@@ -37,6 +39,7 @@ module Push = struct
   
 end
 
+(*Module Pop*)
 module Pop = struct
 
   let encode = function
@@ -50,26 +53,29 @@ module Pop = struct
   
 end
 
+(*Module Branch*)
 module Branch = struct
 
   let encode = function
-    | (Command.Label, lname) -> b_label lname !curr_func
-    | (Command.Goto, lname) -> b_goto lname !curr_func
-    | (Command.Ifgo, lname) -> b_ifgo lname !curr_func
+    | (Command.Label, lname, curr_func) -> b_label lname curr_func
+    | (Command.Goto, lname, curr_func) -> b_goto lname curr_func
+    | (Command.Ifgo, lname, curr_func) -> b_ifgo lname curr_func
   
 end
 
-let encoding = function
-  | Command.C_Function (fname, n) ->
-    curr_func := fname;
-    function_def fname n
-  | Command.C_Call (fname, n) -> function_call fname n
-  | Command.Return -> function_return
-  | Command.ACommands a -> Arithmetic.encode a
-  | Command.Push (seg, n) -> Push.encode (seg, n)
-  | Command.Pop (seg, n) -> Pop.encode (seg, n)
-  | Command.BCommands (branch, lname) -> Branch.encode (branch, lname)
-
 let encode (program: 'v Program.t) =
-  List.map encoding program |> join_lists
+  let rec encoding program func c =
+    match program with
+    | [] -> []
+    | curr :: rest ->
+      match curr with
+      | Command.C_Function (fname, n) -> function_def fname n :: encoding rest fname c
+      | Command.C_Call (fname, n) -> function_call fname n c :: encoding rest func (c+1)
+      | Command.Return -> function_return :: encoding rest func c
+      | Command.ACommands a -> Arithmetic.encode func a :: encoding rest func c
+      | Command.Push (seg, n) -> Push.encode (seg, n) :: encoding rest func c
+      | Command.Pop (seg, n) -> Pop.encode (seg, n) :: encoding rest func c
+      | Command.BCommands (branch, lname) -> Branch.encode (branch, lname, func) :: encoding rest func c
+  in
+  encoding program "" 0 |> join_lists
 
