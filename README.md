@@ -45,14 +45,13 @@ To execute this, follow the steps
 - run  $dune build
 - run  $dune exec assembler --  {path to file}
 > THIS HAS TO BE RUN FROM THE DIR  **./assembler/**  only
-- The output will be generated in  ./assembler/test/out.hack.
+- The output will be generated next to the input file, e.g. Max.asm -> Max.hack
 
 ---
 
 ## Limitations
 
 - It only shows basic errors (not implemented fully)
-- The output file is hardcoded as  ./assembler/test/out.hack
 - The encoded string of bits is hardcoded.
 - Other limitations which I may be unaware of.
 
@@ -92,19 +91,15 @@ To execute this, follow the steps
 - clone the repository properly
 - go to the dir ./jackvm/
 - run  $dune build
-- run  $dune exec jackvm --  {path to file}
+- run  $dune exec jackvm --  {path to file or directory}
 > THIS HAS TO BE RUN FROM THE DIR  **./jackvm/**  only
-- The output will be generated in  ./jackvm/test/out.asm and ./jackvm/test/out.hack .
+- The output will be generated next to the input: Foo.vm -> Foo.asm and Foo.hack, a directory Dir -> Dir/Dir.asm and Dir/Dir.hack
 
 ---
 
 ## Limitations
 
 - It only shows basic errors (not implemented fully)
-- Static segment is not implemented (so any operation involving static will give error)
-- It can handle only **one file** (as of now).
-- The file should conatin Sys.init function, else it may not run properly.
-- The output file is hardcoded as  ./jack/test/out.asm
 - The encoded list of string of asm instructions is hardcoded.
 - Other limitations which I may be unaware of.
 
