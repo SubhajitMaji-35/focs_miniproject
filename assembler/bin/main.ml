@@ -38,7 +38,7 @@ let () =
   match Array.length Sys.argv with
   | 2 ->
     let in_file = Sys.argv.(1) in
-    let out_file = "./test/out.hack" in
+    let out_file = Filename.remove_extension in_file ^ ".hack" in
 
     Printf.printf "Assembling %s -> %s\n" in_file out_file;
 
