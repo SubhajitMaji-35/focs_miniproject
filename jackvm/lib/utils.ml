@@ -1,4 +1,3 @@
-
 (*
    This file caontains the list of assembly codes corresponding to an operation
    Basically , it is a helper file for the encode module
@@ -75,6 +74,15 @@ let store_to_temp i =[
 ] @ pop_d
   @ ["@R13"; "A=M"; "M=D"]
 
+(*Static operations - static i of the file Foo.vm is the asm variable Foo.i*)
+let load_static file i = [
+  Printf.sprintf "@%s.%d" file i;
+  "D=M"
+]
+
+let store_to_static file i =
+  pop_d @ [Printf.sprintf "@%s.%d" file i; "M=D"]
+
 (*THIS/THAT opearions*)
 let load_pointer i =
   let base = if i = 0 then "THIS" else "THAT" in
@@ -99,9 +107,9 @@ let funclabel_gen fname lname =
   if fname ="" then lname else fname ^ "$" ^ lname
 
 (*Comparision Operations*)
-let comp_op jump fname =
-  let l_true = funclabel_gen fname "TRUE" in
-  let l_end = funclabel_gen fname "END" in
+let comp_op jump fname count =
+  let l_true = funclabel_gen fname ("TRUE" ^ string_of_int count) in
+  let l_end = funclabel_gen fname ("END" ^ string_of_int count) in
 
   [
     "@SP";
@@ -169,8 +177,8 @@ let function_def fname nVars =
   @ init_locals nVars
 
 (*Function Call*)
-let function_call fname nArgs count=
-  let l_return = unique_label fname "ret" count in
+let function_call caller fname nArgs count=
+  let l_return = unique_label caller "ret" count in
   [
     Printf.sprintf "@%s" l_return; "D=A"; "@SP"; "A=M"; "M=D"; "@SP"; "M=M+1";
     "@LCL"; "D=M"; "@SP"; "A=M"; "M=D"; "@SP"; "M=M+1";
@@ -205,5 +213,6 @@ let bootstrap =
   [
     "@256"; "D=A"; "@SP"; "M=D"
   ]
-  @ b_goto "Sys.init" ""
+  @ function_call "Bootstrap" "Sys.init" 0 0
+
 
